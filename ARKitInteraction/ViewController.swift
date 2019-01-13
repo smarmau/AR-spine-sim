@@ -126,9 +126,23 @@ class ViewController: UIViewController {
         if #available(iOS 12.0, *) {
             configuration.environmentTexturing = .automatic
         }
+        
+        // image tracking
+        
+        guard let trackedImages = ARReferenceImage.referenceImages(inGroupNamed: "Photos", bundle: Bundle.main) else {
+            print("No images available")
+            return
+        }
+        configuration.maximumNumberOfTrackedImages = 1
+        configuration.detectionImages = trackedImages
+         //
+        
         session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
 
         statusViewController.scheduleMessage("FIND A SURFACE TO PLACE AN OBJECT", inSeconds: 7.5, messageType: .planeEstimation)
+
+        
+        
     }
 
     // MARK: - Focus Square
@@ -174,6 +188,34 @@ class ViewController: UIViewController {
         }
         alertController.addAction(restartAction)
         present(alertController, animated: true, completion: nil)
+    }
+    
+    // display spinal/tuohey needle with detected image
+    func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
+        
+        let node = SCNNode()
+        
+        if let imageAnchor = anchor as? ARImageAnchor {
+            let plane = SCNPlane(width: imageAnchor.referenceImage.physicalSize.width, height: imageAnchor.referenceImage.physicalSize.height)
+            
+            plane.firstMaterial?.diffuse.contents = UIColor(white: 1, alpha: 0.8)
+            
+            let planeNode = SCNNode(geometry: plane)
+            planeNode.eulerAngles.x = -.pi / 2
+            
+            
+            let shipScene = SCNScene(named: "art.scnassets/toohey.scn")!
+            let shipNode = shipScene.rootNode.childNodes.first!
+            shipNode.position = SCNVector3Zero
+            shipNode.position.z = -0.01
+            shipNode.position.y = 0.005
+            planeNode.addChildNode(shipNode)
+            node.addChildNode(planeNode)
+            
+        }
+        
+        return node
+        
     }
 
 }

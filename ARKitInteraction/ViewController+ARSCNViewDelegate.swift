@@ -57,11 +57,19 @@ extension ViewController: ARSCNViewDelegate, ARSessionDelegate {
             if let planeAnchor = anchor as? ARPlaneAnchor {
                 for object in self.virtualObjectLoader.loadedObjects {
                     object.adjustOntoPlaneAnchor(planeAnchor, using: node)
+                    
                 }
             } else {
                 if let objectAtAnchor = self.virtualObjectLoader.loadedObjects.first(where: { $0.anchor == anchor }) {
                     objectAtAnchor.simdPosition = anchor.transform.translation
                     objectAtAnchor.anchor = anchor
+                    objectAtAnchor.renderingOrder = 0
+                    
+            
+                    // objectAtAnchor.position.z = -1
+                    // objectAtAnchor.position.y = -1
+                    
+
                 }
             }
         }
